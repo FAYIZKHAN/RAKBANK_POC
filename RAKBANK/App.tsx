@@ -1,47 +1,20 @@
+// App.tsx
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, Alert } from "react-native";
+import { View, Text } from "react-native";
 import CalendarPicker from "react-native-calendar-picker";
 import moment from "moment"; // Import moment.js
 import { styles } from "./styles";
+import NotesSection from "./NotesSection"; // Import the new NotesSection component
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [notes, setNotes] = useState<{ [key: string]: string[] }>({});
-  const [noteInput, setNoteInput] = useState("");
+  const [viewAllNotes, setViewAllNotes] = useState(false); // State to toggle all notes view
 
   const handleDateChange = (date: any) => {
     if (date) {
       const formattedDate = moment(date).format("YYYY-MM-DD");
       setSelectedDate(formattedDate);
-    }
-  };
-
-  const addNote = () => {
-    if (selectedDate) {
-      if (!notes[selectedDate]) {
-        notes[selectedDate] = [];
-      }
-
-      if (notes[selectedDate].length >= 100) {
-        Alert.alert("Note Limit Reached", "You can only add up to 100 notes per date.");
-        return;
-      }
-
-      setNotes({
-        ...notes,
-        [selectedDate]: [...notes[selectedDate], noteInput],
-      });
-      setNoteInput("");
-    }
-  };
-
-  const deleteNote = (index: number) => {
-    if (selectedDate && notes[selectedDate]) {
-      const updatedNotes = notes[selectedDate].filter((_, noteIndex) => noteIndex !== index);
-      setNotes({
-        ...notes,
-        [selectedDate]: updatedNotes,
-      });
     }
   };
 
@@ -61,7 +34,7 @@ const App = () => {
         todayBackgroundColor="transparent"
         selectedDayColor="orange"
         selectedDayTextColor="white"
-        customDatesStyles={(date: any) => {  // Corrected the property name here
+        customDatesStyles={(date: any) => {
           if (moment().isSame(date, "day")) {
             return {
               style: {
@@ -104,41 +77,15 @@ const App = () => {
         }}
       />
 
+      {/* Render the NotesSection component */}
       {selectedDate && (
-        <Text style={styles.selectedDate}>Selected Date: {selectedDate}</Text>
-      )}
-
-      {!isDateDisabled(selectedDate) && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Add a note..."
-            placeholderTextColor="gray"
-            value={noteInput}
-            onChangeText={setNoteInput}
-          />
-          <Button
-            title="Save Note"
-            onPress={addNote}
-            color="orange"
-          />
-        </>
-      )}
-
-      {selectedDate && (
-        <FlatList
-          data={notes[selectedDate] || []}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.noteItemContainer}>
-              <Text style={styles.noteItem}>
-                {index + 1}. {item}
-              </Text>
-              <TouchableOpacity onPress={() => deleteNote(index)}>
-                <Text style={styles.deleteText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        <NotesSection
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          notes={notes}
+          setNotes={setNotes}
+          viewAllNotes={viewAllNotes}
+          setViewAllNotes={setViewAllNotes}
         />
       )}
     </View>
